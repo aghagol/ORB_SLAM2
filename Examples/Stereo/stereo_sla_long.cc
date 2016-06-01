@@ -34,13 +34,14 @@ using namespace std;
 void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
                 vector<string> &vstrImageRight, vector<double> &vTimestamps);
 
-
-
-
-
 int main(int argc, char **argv)
 {
-    cout << "=============== SLAM Mode with train data: STARTED! ============= " << endl;
+    if(argc != 4)
+    {
+        cerr << endl << "Usage: ./stereo_kitti path_to_vocabulary path_to_settings path_to_sequence" << endl;
+        return 1;
+    }
+
     vector<string> vstrImageLeft;
     vector<string> vstrImageRight;
     vector<double> vTimestamps;
@@ -60,12 +61,31 @@ int main(int argc, char **argv)
         double tframe = vTimestamps[ni];
         if(imLeft.empty())
         {
-            cerr << endl << "Failed to load image at: " << string(vstrImageLeft[ni]) << endl;
+            cerr << endl << "Failed to load image at: "
+                 << string(vstrImageLeft[ni]) << endl;
             return 1;
         }
-        SLAM.TrackStereo(imLeft,imRight,tframe);
+#ifdef COMPILEDWITHC11
+        std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+#else
+        std::chrono::monotonic_clock::time_point t1 = std::chrono::monotonic_clock::now();
+#endif
+        SLAM.TrackStereo(imLeft,imRight,tframe);        
+#ifdef COMPILEDWITHC11
+        std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+#else
+        std::chrono::monotonic_clock::time_point t2 = std::chrono::monotonic_clock::now();
+#endif
+        double ttrack= std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
+        vTimesTrack[ni]=ttrack;
+        double T=0;
+        if(ni<nImages-1)
+            T = vTimestamps[ni+1]-tframe;
+        else if(ni>0)
+            T = tframe-vTimestamps[ni-1];
+        if(ttrack<T)
+            usleep((T-ttrack)*1e6);
     }
-    cout << "=============== SLAM Mode with train data: THE END! ============= " << endl;
 
     cout << "=============== Localization Mode with test data: STARTED! ============= " << endl;
     SLAM.ActivateLocalizationMode();
@@ -86,27 +106,52 @@ int main(int argc, char **argv)
         double tframe = vTimestamps[ni];
         if(imLeft.empty())
         {
-            cerr << endl << "Failed to load image at: " << string(vstrImageLeft[ni]) << endl;
+            cerr << endl << "Failed to load image at: "
+                 << string(vstrImageLeft[ni]) << endl;
             return 1;
         }
+#ifdef COMPILEDWITHC11
+        std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+#else
+        std::chrono::monotonic_clock::time_point t1 = std::chrono::monotonic_clock::now();
+#endif
         SLAM.TrackStereo(imLeft,imRight,tframe);        
+#ifdef COMPILEDWITHC11
+        std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+#else
+        std::chrono::monotonic_clock::time_point t2 = std::chrono::monotonic_clock::now();
+#endif
+        double ttrack= std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
+        vTimesTrack[ni]=ttrack;
+        double T=0;
+        if(ni<nImages-1)
+            T = vTimestamps[ni+1]-tframe;
+        else if(ni>0)
+            T = tframe-vTimestamps[ni-1];
+        if(ttrack<T)
+            usleep((T-ttrack)*1e6);
     }
     cout << "=============== Localization Mode with test data: THE END! ============= " << endl;
 
+    // Stop all threads
     SLAM.Shutdown();
+
+    // Tracking time statistics
+    sort(vTimesTrack.begin(),vTimesTrack.end());
+    float totaltime = 0;
+    for(int ni=0; ni<nImages; ni++)
+    {
+        totaltime+=vTimesTrack[ni];
+    }
+    cout << "-------" << endl << endl;
+    cout << "median tracking time: " << vTimesTrack[nImages/2] << endl;
+    cout << "mean tracking time: " << totaltime/nImages << endl;
+
+    // Save camera trajectory
     SLAM.SaveTrajectoryKITTI("CameraTrajectory_train_test_2016_03_04.txt");
+
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
 
 void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
                 vector<string> &vstrImageRight, vector<double> &vTimestamps)
@@ -127,11 +172,14 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
             vTimestamps.push_back(t);
         }
     }
+
     string strPrefixLeft = strPathToSequence + "/image_0/";
     string strPrefixRight = strPathToSequence + "/image_1/";
+
     const int nTimes = vTimestamps.size();
     vstrImageLeft.resize(nTimes);
     vstrImageRight.resize(nTimes);
+
     for(int i=0; i<nTimes; i++)
     {
         stringstream ss;
