@@ -1,0 +1,65 @@
+mo@moair540:~/github/ORB_SLAM2/Examples/Stereo$ ./stereo_sla ../../Vocabulary/ORBvoc.txt SLA_Jaguar.yaml ~/Desktop/ROS_data/jaguar/2016-03-04/
+
+ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Stereo
+
+Loading ORB Vocabulary. This could take a while...
+Vocabulary loaded!
+
+
+Camera Parameters: 
+- fx: 235.898
+- fy: 235.898
+- cx: 176.495
+- cy: 115.092
+- k1: -0.387051
+- k2: 0.145542
+- p1: 0.00113937
+- p2: 0.000240518
+- fps: 15
+- color order: RGB (ignored if grayscale)
+
+ORB Extractor Parameters: 
+- Number of Features: 3000
+- Scale Levels: 8
+- Scale Factor: 1.2
+- Initial Fast Threshold: 20
+- Minimum Fast Threshold: 7
+
+Depth Threshold (Close/Far Points): 11.2502
+
+-------
+Start processing sequence ...
+Images in the sequence: 3530
+
+New map created with 940 points
+Loop detected!
+Local Mapping STOP
+Local Mapping RELEASE
+Loop Closed!
+Starting Global Bundle Adjustment
+=============== Localization Mode with test data: STARTED! ============= 
+
+-------
+Start processing sequence ...
+Images in the sequence: 3333
+
+Local Mapping STOP
+=============== Localization Mode with test data: THE END! ============= 
+Global Bundle Adjustment finished
+Updating map ...
+Map updated!
+-------
+
+median tracking time: 0.0814309
+mean tracking time: 0.0855582
+
+Saving camera trajectory to CameraTrajectory_train_test_2016_03_04.txt ...
+
+trajectory saved!
+mo@moair540:~/github/ORB_SLAM2/Examples/Stereo$ 
+
