@@ -23,7 +23,11 @@
 #include "KeyFrame.h"
 #include "Thirdparty/DBoW2/DBoW2/BowVector.h"
 
-#include<mutex>
+#include <mutex>
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -240,14 +244,14 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
 
     if(useCNN) //Mohammad: read pre-computed CNN scores from file
     {
-        // cout << "woking on " << fixed << setprecision(6) <<  F->mTimeStamp << endl;
+        cout << "woking on " << fixed << setprecision(6) <<  F->mTimeStamp << endl;
         map<string,float> SimScore;
         ifstream fTimes;
         stringstream strPathImListFile;
-        strPathImListFile << fixed;
-        strPathImListFile << SSPath << "/ss/";
-        strPathImListFile << setprecision(1) << F->mTimeStamp;
+        strPathImListFile << SSPath << "/test/ss/";
+        strPathImListFile << fixed << setprecision(6) << F->mTimeStamp;
         strPathImListFile << ".left.ss";
+        cout << "path to ss file: " << strPathImListFile.str();
         fTimes.open(strPathImListFile.str().c_str());
         int counter=0;
         while(!fTimes.eof())
@@ -274,7 +278,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
                 // float si = mpVoc->score(F->mBowVec,pKFi->mBowVec);
                 stringstream ss;
                 ss << fixed;
-                ss << setprecision(1) << pKFi->mTimeStamp;
+                ss << setprecision(6) << pKFi->mTimeStamp;
                 float si = SimScore[ss.str()];
                 pKFi->mRelocScore = si;
                 lScoreAndMatch.push_back(make_pair(si,pKFi));
@@ -381,7 +385,8 @@ void KeyFrameDatabase::SetF2FSSPath(const string &PathSS) //Mohammad
     cout << "loading CNN Similarity scores (frame-frame similarity)" << endl;
     SSPath = PathSS;
     ifstream fTimes;
-    string strPathImListFile = SSPath + "/times.txt";
+    string strPathImListFile = SSPath + "/train/times.txt";
+    // cout << "path to times.txt file: " << strPathImListFile;
     fTimes.open(strPathImListFile.c_str());
     int counter=0;
     while(!fTimes.eof())
