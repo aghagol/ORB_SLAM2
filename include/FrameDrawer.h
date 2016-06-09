@@ -62,6 +62,7 @@ protected:
     vector<cv::KeyPoint> mvIniKeys;
     vector<int> mvIniMatches;
     int mState;
+    double mvTimeStamp;
 
     Map* mpMap;
 

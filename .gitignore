@@ -48,6 +48,10 @@ Vocabulary/ORBvoc.txt
 ######################
 Examples/Stereo/stereo_kitti
 
+# misc #
+########
+Examples/Stereo/logs/
+
 
 
 

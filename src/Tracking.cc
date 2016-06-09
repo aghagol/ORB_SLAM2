@@ -948,7 +948,8 @@ bool Tracking::TrackLocalMap()
             if(!mCurrentFrame.mvbOutlier[i])
             {
                 mCurrentFrame.mvpMapPoints[i]->IncreaseFound();
-                if(!mbOnlyTracking)
+                // if(!mbOnlyTracking)
+                if(true) //Mohammad
                 {
                     if(mCurrentFrame.mvpMapPoints[i]->Observations()>0)
                         mnMatchesInliers++;
@@ -1360,6 +1361,13 @@ bool Tracking::Relocalization()
     // Track Lost: Query KeyFrame Database for keyframe candidates for relocalisation
     vector<KeyFrame*> vpCandidateKFs = mpKeyFrameDB->DetectRelocalizationCandidates(&mCurrentFrame);
 
+    if (mState==LOST)
+    {
+    	cout << "DEBUG: Relocalizing frame: ";
+	    cout << fixed << setprecision(6) << mCurrentFrame.mTimeStamp;
+	    cout << ", found " << vpCandidateKFs.size() << " candidates" << endl;
+    }
+
     if(vpCandidateKFs.empty())
         return false;
 
@@ -1401,6 +1409,13 @@ bool Tracking::Relocalization()
                 nCandidates++;
             }
         }
+    }
+
+    if (mState==LOST)
+    {
+    	cout << "DEBUG: Relocalizing frame: ";
+	    cout << fixed << setprecision(6) << mCurrentFrame.mTimeStamp;
+	    cout << ", " << nCandidates << " candidates retained" << endl;
     }
 
     // Alternatively perform some iterations of P4P RANSAC
@@ -1500,6 +1515,13 @@ bool Tracking::Relocalization()
                 }
             }
         }
+    }
+
+    if (mState==LOST)
+    {
+    	cout << "DEBUG: Relocalizing frame: ";
+	    cout << fixed << setprecision(6) << mCurrentFrame.mTimeStamp;
+	    cout << ", matching succesful? " << bMatch << endl;
     }
 
     if(!bMatch)
