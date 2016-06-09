@@ -244,7 +244,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
 
     if(useCNN) //Mohammad: read pre-computed CNN scores from file
     {
-        cout << "woking on " << fixed << setprecision(6) <<  F->mTimeStamp << endl;
+        // cout << "woking on " << fixed << setprecision(6) <<  F->mTimeStamp << endl;
         map<string,float> SimScore;
         ifstream fTimes;
         stringstream strPathImListFile;
@@ -252,9 +252,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
         strPathImListFile << SSPath << "/test/ss/";
         strPathImListFile << setprecision(6) << F->mTimeStamp;
         strPathImListFile << ".left.ss";
-        // cout << "path to ss file: " << endl;
         fTimes.open(strPathImListFile.str().c_str());
-        // cout << "file opened" << endl;
         int counter=0;
         while(!fTimes.eof())
         {
@@ -262,7 +260,6 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
             getline(fTimes,s);
             if(!s.empty())
             {
-                cout << counter << endl;
                 stringstream ss;
                 ss << s;
                 float val;
@@ -388,7 +385,7 @@ void KeyFrameDatabase::SetF2FSSPath(const string &PathSS) //Mohammad
     cout << "loading CNN Similarity scores (frame-frame similarity)" << endl;
     SSPath = PathSS;
     ifstream fTimes;
-    string strPathImListFile = SSPath + "/train/times.txt";
+    string strPathImListFile = SSPath + "/train/times.full.txt";
     // cout << "path to times.txt file: " << strPathImListFile;
     fTimes.open(strPathImListFile.c_str());
     int counter=0;

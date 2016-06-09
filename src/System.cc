@@ -426,7 +426,6 @@ void System::SaveTrajectoryKITTI(const string &filename)
 
         while(pKF->isBad())
         {
-          //  cout << "bad parent" << endl;
             Trw = Trw*pKF->mTcp;
             pKF = pKF->GetParent();
         }
