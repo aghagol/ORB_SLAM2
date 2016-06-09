@@ -85,9 +85,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Stereo)
 # Examples/Stereo/stereo_kitti.cc)
 # target_link_libraries(stereo_kitti ${PROJECT_NAME})
 
-add_executable(stereo_sla
-Examples/Stereo/stereo_sla.cc)
-target_link_libraries(stereo_sla ${PROJECT_NAME})
+# add_executable(stereo_sla
+# Examples/Stereo/stereo_sla.cc)
+# target_link_libraries(stereo_sla ${PROJECT_NAME})
+
+add_executable(stereo_traintest
+Examples/Stereo/stereo_traintest.cc)
+target_link_libraries(stereo_traintest ${PROJECT_NAME})
 
 # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Monocular)
 

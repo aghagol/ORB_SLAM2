@@ -240,7 +240,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
 
     if(useCNN) //Mohammad: read pre-computed CNN scores from file
     {
-        // cout << "woking on " << fixed << setprecision(1) <<  F->mTimeStamp << endl;
+        // cout << "woking on " << fixed << setprecision(6) <<  F->mTimeStamp << endl;
         map<string,float> SimScore;
         ifstream fTimes;
         stringstream strPathImListFile;
@@ -376,11 +376,12 @@ void KeyFrameDatabase::DeActivateCNN() //Mohammad
     useCNN = false;
 }
 
-void KeyFrameDatabase::SetF2FSSPath(const string &SSPath) //Mohammad
+void KeyFrameDatabase::SetF2FSSPath(const string &PathSS) //Mohammad
 {
     cout << "loading CNN Similarity scores (frame-frame similarity)" << endl;
+    SSPath = PathSS;
     ifstream fTimes;
-    string strPathImListFile = SSPath + "/imagelist.txt";
+    string strPathImListFile = SSPath + "/times.txt";
     fTimes.open(strPathImListFile.c_str());
     int counter=0;
     while(!fTimes.eof())

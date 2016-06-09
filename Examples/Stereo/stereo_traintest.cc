@@ -27,7 +27,7 @@
 
 #include <opencv2/core/core.hpp>
 
-#include <System.h>
+#include<System.h>
 
 using namespace std;
 
@@ -40,10 +40,11 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
 
 int main(int argc, char **argv)
 {
+    cout << "=============== SLAM Mode with train data: STARTED! ============= " << endl;
     vector<string> vstrImageLeft;
     vector<string> vstrImageRight;
     vector<double> vTimestamps;
-    LoadImages(string(argv[3]), vstrImageLeft, vstrImageRight, vTimestamps);
+    LoadImages(string(argv[3])+"/train", vstrImageLeft, vstrImageRight, vTimestamps);
     int nImages = vstrImageLeft.size();
     ORB_SLAM2::System SLAM(argv[1],argv[2],ORB_SLAM2::System::STEREO,true);
     vector<float> vTimesTrack;
@@ -52,17 +53,8 @@ int main(int argc, char **argv)
     cout << "Start processing sequence ..." << endl;
     cout << "Images in the sequence: " << nImages << endl << endl;
     cv::Mat imLeft, imRight;
-    bool modechange_flag = false;
     for(int ni=0; ni<nImages; ni++)
     {
-        if(ni>nImages*.02 && !modechange_flag)
-        {
-            modechange_flag = true;
-            SLAM.SetF2FSSPath(argv[3]);
-            SLAM.ActivateLocalizationMode();
-            SLAM.ActivatePanicMode();
-            SLAM.ActivateCNN();
-        }
         imLeft = cv::imread(vstrImageLeft[ni],CV_LOAD_IMAGE_UNCHANGED);
         imRight = cv::imread(vstrImageRight[ni],CV_LOAD_IMAGE_UNCHANGED);
         double tframe = vTimestamps[ni];
@@ -73,6 +65,36 @@ int main(int argc, char **argv)
         }
         SLAM.TrackStereo(imLeft,imRight,tframe);
     }
+    cout << "=============== SLAM Mode with train data: THE END! ============= " << endl;
+
+    cout << "=============== Localization Mode with test data: STARTED! ============= " << endl;
+    SLAM.SetF2FSSPath(argv[3]);
+    SLAM.ActivateLocalizationMode();
+    SLAM.ActivatePanicMode();
+    SLAM.ActivateCNN();
+    vstrImageLeft.clear();
+    vstrImageRight.clear();
+    vTimestamps.clear();
+    LoadImages(string(argv[3])+"/test", vstrImageLeft, vstrImageRight, vTimestamps);
+    nImages = vstrImageLeft.size();
+    vTimesTrack.clear();
+    vTimesTrack.resize(nImages);
+    cout << endl << "-------" << endl;
+    cout << "Start processing sequence ..." << endl;
+    cout << "Images in the sequence: " << nImages << endl << endl;
+    for(int ni=0; ni<nImages; ni++)
+    {
+        imLeft = cv::imread(vstrImageLeft[ni],CV_LOAD_IMAGE_UNCHANGED);
+        imRight = cv::imread(vstrImageRight[ni],CV_LOAD_IMAGE_UNCHANGED);
+        double tframe = vTimestamps[ni];
+        if(imLeft.empty())
+        {
+            cerr << endl << "Failed to load image at: " << string(vstrImageLeft[ni]) << endl;
+            return 1;
+        }
+        SLAM.TrackStereo(imLeft,imRight,tframe);        
+    }
+    cout << "=============== Localization Mode with test data: THE END! ============= " << endl;
 
     SLAM.Shutdown();
     SLAM.SaveTrajectoryKITTI("CameraTrajectory_train_test_2016_03_04.txt");

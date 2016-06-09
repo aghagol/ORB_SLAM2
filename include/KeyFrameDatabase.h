@@ -74,7 +74,7 @@ public:
   bool useCNN; //Mohammad
   std::string SSPath; //Mohammad
   std::vector<std::string> TS; //Mohammad
-  void SetF2FSSPath(const string &SSPath); //Mohammad
+  void SetF2FSSPath(const string &PathSS); //Mohammad
 
 };
 
