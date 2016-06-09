@@ -1361,17 +1361,23 @@ bool Tracking::Relocalization()
     // Track Lost: Query KeyFrame Database for keyframe candidates for relocalisation
     vector<KeyFrame*> vpCandidateKFs = mpKeyFrameDB->DetectRelocalizationCandidates(&mCurrentFrame);
 
+    const int nKFs = vpCandidateKFs.size();
+
     if (mState==LOST)
     {
     	cout << "DEBUG: Relocalizing frame: ";
 	    cout << fixed << setprecision(6) << mCurrentFrame.mTimeStamp;
 	    cout << ", found " << vpCandidateKFs.size() << " candidates" << endl;
+	    for(int i=0; i<nKFs; i++)
+	    {
+	        KeyFrame* pKF = vpCandidateKFs[i];
+	        cout << fixed << setprecision(6) << pKF->mTimeStamp << " ";
+	    }
+	    cout << endl;
     }
 
     if(vpCandidateKFs.empty())
         return false;
-
-    const int nKFs = vpCandidateKFs.size();
 
     // We perform first an ORB matching with each candidate
     // If enough matches are found we setup a PnP solver
@@ -1416,6 +1422,13 @@ bool Tracking::Relocalization()
     	cout << "DEBUG: Relocalizing frame: ";
 	    cout << fixed << setprecision(6) << mCurrentFrame.mTimeStamp;
 	    cout << ", " << nCandidates << " candidates retained" << endl;
+	    for(int i=0; i<nKFs; i++)
+	    {
+	    	if(vbDiscarded[i]) {continue;}
+	        KeyFrame* pKF = vpCandidateKFs[i];
+	        cout << fixed << setprecision(6) << pKF->mTimeStamp << " ";
+	    }
+	    cout << endl;
     }
 
     // Alternatively perform some iterations of P4P RANSAC
