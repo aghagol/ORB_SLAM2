@@ -64,14 +64,19 @@ int main(int argc, char **argv)
             return 1;
         }
         SLAM.TrackStereo(imLeft,imRight,tframe);
+
+
+        if(ni>100) {break;} /////////////////////////////////////////////////////////////
+
+
     }
     cout << "=============== SLAM Mode with train data: THE END! ============= " << endl;
 
     cout << "=============== Localization Mode with test data: STARTED! ============= " << endl;
     SLAM.SetF2FSSPath(argv[3]);
     SLAM.ActivateLocalizationMode();
-    // SLAM.ActivatePanicMode();
-    // SLAM.ActivateCNN();
+    SLAM.ActivatePanicMode();
+    SLAM.ActivateCNN();
     vstrImageLeft.clear();
     vstrImageRight.clear();
     vTimestamps.clear();

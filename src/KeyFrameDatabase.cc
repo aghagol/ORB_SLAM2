@@ -248,11 +248,13 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
         map<string,float> SimScore;
         ifstream fTimes;
         stringstream strPathImListFile;
+        strPathImListFile << fixed;
         strPathImListFile << SSPath << "/test/ss/";
-        strPathImListFile << fixed << setprecision(6) << F->mTimeStamp;
+        strPathImListFile << setprecision(6) << F->mTimeStamp;
         strPathImListFile << ".left.ss";
-        cout << "path to ss file: " << strPathImListFile.str();
+        // cout << "path to ss file: " << endl;
         fTimes.open(strPathImListFile.str().c_str());
+        // cout << "file opened" << endl;
         int counter=0;
         while(!fTimes.eof())
         {
@@ -260,6 +262,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
             getline(fTimes,s);
             if(!s.empty())
             {
+                cout << counter << endl;
                 stringstream ss;
                 ss << s;
                 float val;
