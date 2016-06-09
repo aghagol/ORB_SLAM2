@@ -156,6 +156,18 @@ private:
     std::mutex mMutexMode;
     bool mbActivateLocalizationMode;
     bool mbDeactivateLocalizationMode;
+
+    bool mbActivatePanicMode; //Mohammad
+    bool mbActivateCNN; //Mohammad
+    bool F2FSSPathSet; //Mohammad
+
+public:
+    void ActivatePanicMode(); //Mohammad
+    void DeActivatePanicMode(); //Mohammad
+    void ActivateCNN(); //Mohammad
+    void DeActivateCNN(); //Mohammad
+    void SetF2FSSPath(const string &strSSPath); //Mohammad
+
 };
 
 }// namespace ORB_SLAM

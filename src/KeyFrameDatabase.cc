@@ -31,7 +31,7 @@ namespace ORB_SLAM2
 {
 
 KeyFrameDatabase::KeyFrameDatabase (const ORBVocabulary &voc):
-    mpVoc(&voc)
+    mpVoc(&voc), useCNN(false) //Mohammad
 {
     mvInvertedFile.resize(voc.size());
 }
@@ -238,19 +238,78 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
 
     int nscores=0;
 
-    // Compute similarity score.
-    for(list<KeyFrame*>::iterator lit=lKFsSharingWords.begin(), lend= lKFsSharingWords.end(); lit!=lend; lit++)
+    if(useCNN) //Mohammad: read pre-computed CNN scores from file
     {
-        KeyFrame* pKFi = *lit;
-
-        if(pKFi->mnRelocWords>minCommonWords)
+        // cout << "woking on " << fixed << setprecision(1) <<  F->mTimeStamp << endl;
+        map<string,float> SimScore;
+        ifstream fTimes;
+        stringstream strPathImListFile;
+        strPathImListFile << fixed;
+        strPathImListFile << SSPath << "/ss/";
+        strPathImListFile << setprecision(1) << F->mTimeStamp;
+        strPathImListFile << ".left.ss";
+        fTimes.open(strPathImListFile.str().c_str());
+        int counter=0;
+        while(!fTimes.eof())
         {
-            nscores++;
-            float si = mpVoc->score(F->mBowVec,pKFi->mBowVec);
-            pKFi->mRelocScore=si;
-            lScoreAndMatch.push_back(make_pair(si,pKFi));
+            string s;
+            getline(fTimes,s);
+            if(!s.empty())
+            {
+                stringstream ss;
+                ss << s;
+                float val;
+                ss >> val;
+                SimScore[TS[counter]] = val;
+                counter++;
+            }
+        }
+        for(list<KeyFrame*>::iterator lit=lKFsSharingWords.begin(), lend= lKFsSharingWords.end(); lit!=lend; lit++)
+        {
+            KeyFrame* pKFi = *lit;
+
+            if(pKFi->mnRelocWords>minCommonWords)
+            {
+                nscores++;
+                // float si = mpVoc->score(F->mBowVec,pKFi->mBowVec);
+                stringstream ss;
+                ss << fixed;
+                ss << setprecision(1) << pKFi->mTimeStamp;
+                float si = SimScore[ss.str()];
+                pKFi->mRelocScore = si;
+                lScoreAndMatch.push_back(make_pair(si,pKFi));
+            }
         }
     }
+    else //original approach
+    {
+        for(list<KeyFrame*>::iterator lit=lKFsSharingWords.begin(), lend= lKFsSharingWords.end(); lit!=lend; lit++)
+        {
+            KeyFrame* pKFi = *lit;
+
+            if(pKFi->mnRelocWords>minCommonWords)
+            {
+                nscores++;
+                float si = mpVoc->score(F->mBowVec,pKFi->mBowVec);
+                pKFi->mRelocScore=si;
+                lScoreAndMatch.push_back(make_pair(si,pKFi));
+            }
+        }
+    }
+
+    // // Compute similarity score.
+    // for(list<KeyFrame*>::iterator lit=lKFsSharingWords.begin(), lend= lKFsSharingWords.end(); lit!=lend; lit++)
+    // {
+    //     KeyFrame* pKFi = *lit;
+
+    //     if(pKFi->mnRelocWords>minCommonWords)
+    //     {
+    //         nscores++;
+    //         float si = mpVoc->score(F->mBowVec,pKFi->mBowVec);
+    //         pKFi->mRelocScore=si;
+    //         lScoreAndMatch.push_back(make_pair(si,pKFi));
+    //     }
+    // }
 
     if(lScoreAndMatch.empty())
         return vector<KeyFrame*>();
@@ -306,6 +365,39 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
     }
 
     return vpRelocCandidates;
+}
+
+void KeyFrameDatabase::ActivateCNN() //Mohammad
+{
+    useCNN = true;
+}
+void KeyFrameDatabase::DeActivateCNN() //Mohammad
+{
+    useCNN = false;
+}
+
+void KeyFrameDatabase::SetF2FSSPath(const string &SSPath) //Mohammad
+{
+    cout << "loading CNN Similarity scores (frame-frame similarity)" << endl;
+    ifstream fTimes;
+    string strPathImListFile = SSPath + "/imagelist.txt";
+    fTimes.open(strPathImListFile.c_str());
+    int counter=0;
+    while(!fTimes.eof())
+    {
+        string s;
+        getline(fTimes,s);
+        if(!s.empty())
+        {
+            stringstream ss;
+            ss << s;
+            string ts;
+            ss >> ts;
+            TS.push_back(ts);
+            counter++;
+        }
+    }
+    cout << "Done loading CNN Similarity scores!" << endl;
 }
 
 } //namespace ORB_SLAM

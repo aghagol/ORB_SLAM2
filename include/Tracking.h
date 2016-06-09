@@ -83,7 +83,8 @@ public:
         NO_IMAGES_YET=0,
         NOT_INITIALIZED=1,
         OK=2,
-        LOST=3
+        LOST=3,
+        PANIC=911 //Mohammad
     };
 
     eTrackingState mState;
@@ -214,6 +215,11 @@ protected:
     bool mbRGB;
 
     list<MapPoint*> mlpTemporalPoints;
+
+public:
+    void Panic();//Mohammad
+    void UnPanic();//Mohammad
+    
 };
 
 } //namespace ORB_SLAM

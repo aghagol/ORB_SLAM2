@@ -324,7 +324,7 @@ void Tracking::Track()
         {
             // Only Tracking: Local Mapping is deactivated
 
-            if(mState==LOST)
+            if(mState==LOST || mState==PANIC) //Mohammad
             {
                 bOK = Relocalization();
             }
@@ -1596,6 +1596,17 @@ void Tracking::InformOnlyTracking(const bool &flag)
     mbOnlyTracking = flag;
 }
 
+void Tracking::Panic() //Mohammad
+{
+    mState = PANIC;
+}
 
+void Tracking::UnPanic() //Mohammad
+{
+    if (mState==PANIC)
+    {
+        mState = LOST;
+    }
+}
 
 } //namespace ORB_SLAM

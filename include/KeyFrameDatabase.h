@@ -29,7 +29,7 @@
 #include "Frame.h"
 #include "ORBVocabulary.h"
 
-#include<mutex>
+#include <mutex>
 
 
 namespace ORB_SLAM2
@@ -67,6 +67,15 @@ protected:
 
   // Mutex
   std::mutex mMutex;
+
+public:
+  void ActivateCNN(); //Mohammad
+  void DeActivateCNN(); //Mohammad
+  bool useCNN; //Mohammad
+  std::string SSPath; //Mohammad
+  std::vector<std::string> TS; //Mohammad
+  void SetF2FSSPath(const string &SSPath); //Mohammad
+
 };
 
 } //namespace ORB_SLAM

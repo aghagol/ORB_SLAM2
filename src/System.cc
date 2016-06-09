@@ -31,7 +31,8 @@ namespace ORB_SLAM2
 
 System::System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor,
                const bool bUseViewer):mSensor(sensor),mbReset(false),mbActivateLocalizationMode(false),
-        mbDeactivateLocalizationMode(false)
+        mbDeactivateLocalizationMode(false), mbActivatePanicMode(false), mbActivateCNN(false),
+        F2FSSPathSet(false) //Mohammad
 {
     // Output welcome message
     cout << endl <<
@@ -141,6 +142,27 @@ cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const
             mpTracker->InformOnlyTracking(false);
             mpLocalMapper->Release();
             mbDeactivateLocalizationMode = false;
+        }
+        if(mbActivatePanicMode) //Mohammad
+        {
+            mpTracker->Panic();
+        }
+        if(!mbActivatePanicMode) //Mohammad
+        {
+            mpTracker->UnPanic();
+        }
+        if(mbActivateCNN) //Mohammad
+        {
+            if(!F2FSSPathSet)
+            {
+                cerr << "Error: CNN frame-frame similarity score path not specified!" << endl;
+                exit(-1);
+            }
+            mpKeyFrameDatabase->ActivateCNN();
+        }
+        if(!mbActivateCNN) //Mohammad
+        {
+            mpKeyFrameDatabase->DeActivateCNN();
         }
     }
 
@@ -422,5 +444,35 @@ void System::SaveTrajectoryKITTI(const string &filename)
     f.close();
     cout << endl << "trajectory saved!" << endl;
 }
+
+void System::ActivatePanicMode() //Mohammad
+{
+    unique_lock<mutex> lock(mMutexMode);
+    mbActivatePanicMode = true;
+}
+
+void System::ActivateCNN() //Mohammad
+{
+    unique_lock<mutex> lock(mMutexMode);
+    mbActivateCNN = true;
+}
+
+void System::DeActivatePanicMode() //Mohammad
+{
+    unique_lock<mutex> lock(mMutexMode);
+    mbActivatePanicMode = false;
+}
+
+void System::DeActivateCNN() //Mohammad
+{
+    unique_lock<mutex> lock(mMutexMode);
+    mbActivateCNN = false;
+}
+void System::SetF2FSSPath(const string &strSSPath) //Mohammad
+{
+    F2FSSPathSet = true;
+    mpKeyFrameDatabase->SetF2FSSPath(strSSPath);
+}
+
 
 } //namespace ORB_SLAM
