@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-log = 'loc_easylost_noBA_panic_cnn'
+log = 'loc_panic_cnn'
 filename = 'logs/'+log+'/CameraTrajectory_train_test_2016_03_04.txt'
 n1 = 3530
 n2 = 3333

@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
-log = 'loc'
+log = 'loc_panic_cnn'
 filename = 'logs/'+log+'/log.txt'
 
 testpath = '/home/mo/Desktop/ROS_data/jaguar/2016-03-04/test/left/'
@@ -16,14 +16,14 @@ def mplot(fig,imfile,cands,suc):
 	img = mpimg.imread(testpath+imfile)
 	plt.imshow(img, cmap=plt.get_cmap('gray'))
 	a.set_title('input')
-	counter=2
+	counter=1
 	for cand in cands:
-		a = fig.add_subplot(4,5,counter)
+		a = fig.add_subplot(4,5,counter+1)
 		img = mpimg.imread(trainpath+cand)
 		plt.imshow(img, cmap=plt.get_cmap('gray'))
-		a.set_title('candidate %d' %(counter-1))
+		a.set_title('candidate %d' %counter)
 		counter+=1
-		if counter>20:
+		if counter>=20:
 			break
 	plt.savefig(outpath+imfile)
 
@@ -44,15 +44,8 @@ with open(filename) as f:
 		if ss[4]=='matching':
 			success = {'0':0,'1':1}[ss[-1]]
 			figor.clf()
-			mplot(figor,image,candids,success)
+			if not os.path.exists(outpath+image):
+				mplot(figor,image,candids,success)
 			print 'processed ' + image
 
-
-
-		
-
-
-
-# plt.savefig(filename[:-4]+'.png')
-# plt.show()
 

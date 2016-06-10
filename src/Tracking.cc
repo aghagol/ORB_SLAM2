@@ -1363,7 +1363,7 @@ bool Tracking::Relocalization()
 
     const int nKFs = vpCandidateKFs.size();
 
-    if (mState==LOST)
+    if (mState==LOST || mState==PANIC)
     {
         cout << "DEBUG: Relocalizing frame: ";
         cout << fixed << setprecision(6) << mCurrentFrame.mTimeStamp;
@@ -1417,7 +1417,7 @@ bool Tracking::Relocalization()
         }
     }
 
-    if (mState==LOST)
+    if (mState==LOST || mState==PANIC)
     {
         cout << "DEBUG: Relocalizing frame: ";
         cout << fixed << setprecision(6) << mCurrentFrame.mTimeStamp;
@@ -1530,7 +1530,7 @@ bool Tracking::Relocalization()
         }
     }
 
-    if (mState==LOST)
+    if (mState==LOST || mState==PANIC)
     {
         cout << "DEBUG: Relocalizing frame: ";
         cout << fixed << setprecision(6) << mCurrentFrame.mTimeStamp;
