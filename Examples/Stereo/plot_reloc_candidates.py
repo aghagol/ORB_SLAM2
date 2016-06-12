@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
-log = 'loc_panic_cnn'
+log = 'loc_lesschecks_panic_cnn'
 filename = 'logs/'+log+'/log.txt'
 
 testpath = '/home/mo/Desktop/ROS_data/jaguar/2016-03-04/test/left/'
@@ -12,18 +12,18 @@ outpath = '/home/mo/Desktop/out/'+log+'/'
 
 def mplot(fig,imfile,cands,suc):
 	fig.suptitle('Relocalization successfull? %d'%suc)
-	a = fig.add_subplot(4,5,1)
+	a = fig.add_subplot(5,6,1)
 	img = mpimg.imread(testpath+imfile)
 	plt.imshow(img, cmap=plt.get_cmap('gray'))
 	a.set_title('input')
 	counter=1
 	for cand in cands:
-		a = fig.add_subplot(4,5,counter+1)
+		a = fig.add_subplot(5,6,counter+1)
 		img = mpimg.imread(trainpath+cand)
 		plt.imshow(img, cmap=plt.get_cmap('gray'))
 		a.set_title('candidate %d' %counter)
 		counter+=1
-		if counter>=20:
+		if counter>=30:
 			break
 	plt.savefig(outpath+imfile)
 

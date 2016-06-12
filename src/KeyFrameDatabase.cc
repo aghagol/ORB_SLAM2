@@ -215,7 +215,8 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
             for(list<KeyFrame*>::iterator lit=lKFs.begin(), lend= lKFs.end(); lit!=lend; lit++)
             {
                 KeyFrame* pKFi=*lit;
-                if(pKFi->mnRelocQuery!=F->mnId)
+                // if(pKFi->mnRelocQuery!=F->mnId)
+                if(true)//Mohammad: nob1
                 {
                     pKFi->mnRelocWords=0;
                     pKFi->mnRelocQuery=F->mnId;
@@ -272,7 +273,8 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
         {
             KeyFrame* pKFi = *lit;
 
-            if(pKFi->mnRelocWords>minCommonWords)
+            // if(pKFi->mnRelocWords>minCommonWords)
+            if(true) //Mohammad: nob2
             {
                 nscores++;
                 // float si = mpVoc->score(F->mBowVec,pKFi->mBowVec);
@@ -318,14 +320,16 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
     if(lScoreAndMatch.empty())
         return vector<KeyFrame*>();
 
-    list<pair<float,KeyFrame*> > lAccScoreAndMatch;
+    // list<pair<float,KeyFrame*> > lAccScoreAndMatch;
+    vector<pair<float,KeyFrame*> > lAccScoreAndMatch; //Mohammad: why not?
     float bestAccScore = 0;
 
     // Lets now accumulate score by covisibility
     for(list<pair<float,KeyFrame*> >::iterator it=lScoreAndMatch.begin(), itend=lScoreAndMatch.end(); it!=itend; it++)
     {
         KeyFrame* pKFi = it->second;
-        vector<KeyFrame*> vpNeighs = pKFi->GetBestCovisibilityKeyFrames(10);
+        // vector<KeyFrame*> vpNeighs = pKFi->GetBestCovisibilityKeyFrames(10);
+        vector<KeyFrame*> vpNeighs = pKFi->GetBestCovisibilityKeyFrames(1); //Mohammad
 
         float bestScore = it->first;
         float accScore = bestScore;
@@ -349,12 +353,16 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
             bestAccScore=accScore;
     }
 
+    sort(lAccScoreAndMatch.rbegin(),lAccScoreAndMatch.rend()); //Mohammad
+
     // Return all those keyframes with a score higher than 0.75*bestScore
-    float minScoreToRetain = 0.75f*bestAccScore;
+    // float minScoreToRetain = 0.75f*bestAccScore;
+    float minScoreToRetain = lAccScoreAndMatch[10].first; //Mohammad
     set<KeyFrame*> spAlreadyAddedKF;
     vector<KeyFrame*> vpRelocCandidates;
     vpRelocCandidates.reserve(lAccScoreAndMatch.size());
-    for(list<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.end(); it!=itend; it++)
+    // for(list<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.end(); it!=itend; it++)
+    for(vector<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.end(); it!=itend; it++)
     {
         const float &si = it->first;
         if(si>minScoreToRetain)
