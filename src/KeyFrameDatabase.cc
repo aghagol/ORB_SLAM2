@@ -215,8 +215,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
             for(list<KeyFrame*>::iterator lit=lKFs.begin(), lend= lKFs.end(); lit!=lend; lit++)
             {
                 KeyFrame* pKFi=*lit;
-                // if(pKFi->mnRelocQuery!=F->mnId)
-                if(true)//Mohammad: nob1
+                if(pKFi->mnRelocQuery!=F->mnId)
                 {
                     pKFi->mnRelocWords=0;
                     pKFi->mnRelocQuery=F->mnId;
@@ -245,7 +244,6 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
 
     if(useCNN) //Mohammad: read pre-computed CNN scores from file
     {
-        // cout << "woking on " << fixed << setprecision(6) <<  F->mTimeStamp << endl;
         map<string,float> SimScore;
         ifstream fTimes;
         stringstream strPathImListFile;
@@ -274,10 +272,9 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
             KeyFrame* pKFi = *lit;
 
             // if(pKFi->mnRelocWords>minCommonWords)
-            if(true) //Mohammad: nob2
+            if(true) //Mohammad
             {
                 nscores++;
-                // float si = mpVoc->score(F->mBowVec,pKFi->mBowVec);
                 stringstream ss;
                 ss << fixed;
                 ss << setprecision(6) << pKFi->mTimeStamp;
@@ -328,8 +325,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
     for(list<pair<float,KeyFrame*> >::iterator it=lScoreAndMatch.begin(), itend=lScoreAndMatch.end(); it!=itend; it++)
     {
         KeyFrame* pKFi = it->second;
-        // vector<KeyFrame*> vpNeighs = pKFi->GetBestCovisibilityKeyFrames(10);
-        vector<KeyFrame*> vpNeighs = pKFi->GetBestCovisibilityKeyFrames(1); //Mohammad
+        vector<KeyFrame*> vpNeighs = pKFi->GetBestCovisibilityKeyFrames(10);
 
         float bestScore = it->first;
         float accScore = bestScore;
@@ -353,28 +349,39 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
             bestAccScore=accScore;
     }
 
+    lAccScoreAndMatch.clear(); //Mohammad
+    lAccScoreAndMatch.reserve(lScoreAndMatch.size());
+    copy(begin(lScoreAndMatch),end(lScoreAndMatch),back_inserter(lAccScoreAndMatch)); //Mohammad
     sort(lAccScoreAndMatch.rbegin(),lAccScoreAndMatch.rend()); //Mohammad
 
-    // Return all those keyframes with a score higher than 0.75*bestScore
-    // float minScoreToRetain = 0.75f*bestAccScore;
-    float minScoreToRetain = lAccScoreAndMatch[10].first; //Mohammad
-    set<KeyFrame*> spAlreadyAddedKF;
-    vector<KeyFrame*> vpRelocCandidates;
-    vpRelocCandidates.reserve(lAccScoreAndMatch.size());
-    // for(list<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.end(); it!=itend; it++)
-    for(vector<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.end(); it!=itend; it++)
+    // // Return all those keyframes with a score higher than 0.75*bestScore
+    // // float minScoreToRetain = 0.75f*bestAccScore;
+    // // float minScoreToRetain = lAccScoreAndMatch[10].first; //Mohammad
+    // set<KeyFrame*> spAlreadyAddedKF;
+    // vector<KeyFrame*> vpRelocCandidates;
+    // vpRelocCandidates.reserve(lAccScoreAndMatch.size());
+    // // for(list<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.end(); it!=itend; it++)
+    // for(vector<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.end(); it!=itend; it++)
+    // {
+    //     const float &si = it->first;
+    //     if(si>minScoreToRetain)
+    //     {
+    //         KeyFrame* pKFi = it->second;
+    //         if(!spAlreadyAddedKF.count(pKFi))
+    //         {
+    //             vpRelocCandidates.push_back(pKFi);
+    //             spAlreadyAddedKF.insert(pKFi);
+    //         }
+    //     }
+    // }
+
+    int nkf(min(10,int(lAccScoreAndMatch.size()))); //Mohammad
+    vector<KeyFrame*> vpRelocCandidates; //Mohammad
+    for(vector<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.begin()+nkf; it!=itend; it++)
     {
-        const float &si = it->first;
-        if(si>minScoreToRetain)
-        {
-            KeyFrame* pKFi = it->second;
-            if(!spAlreadyAddedKF.count(pKFi))
-            {
-                vpRelocCandidates.push_back(pKFi);
-                spAlreadyAddedKF.insert(pKFi);
-            }
-        }
-    }
+        KeyFrame* pKFi = it->second;
+        vpRelocCandidates.push_back(pKFi);
+    } //Mohammad
 
     return vpRelocCandidates;
 }
