@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-log = 'loc_nochecks_panic_cnn'
+log = 'loc_panic_nodiscard_minthresh_top10cnn'
 # log = 'loc_nochecks_lowthresh_panic_cnn'
 
 filename = 'logs/'+log+'/CameraTrajectory_train_test_2016_03_04.txt'

@@ -3,7 +3,7 @@ import numpy as np
 
 # logfiles = ['loc','loc_cnn','loc_panic','loc_panic_cnn','loc_lesschecks_panic_cnn']
 # logfiles = ['loc_panic','loc_panic_cnn','loc_lesschecks_panic_cnn']
-logfiles = ['loc_nochecks_panic_cnn']
+logfiles = ['loc_panic_nodiscard_minthresh_top10cnn']
 # logfiles = ['loc_nochecks_lowthresh_panic_cnn']
 
 for log in logfiles:
@@ -37,7 +37,7 @@ for log in logfiles:
 	ax.set_xlim([-100, 3400])
 	ax.set_ylim([-1, 11])
 	ax.legend([h1,h2],['successful %.2f'%(sr),'failed reloc'],loc='best')
-	plt.savefig('logs/'+log+'/stats_%s.png'%(log))
+	plt.savefig('logs/'+log+'/CandidateStats_%s.png'%(log))
 	plt.close(fig)
 
 	fig = plt.figure(figsize=(20,10))
