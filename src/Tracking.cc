@@ -1402,7 +1402,8 @@ bool Tracking::Relocalization()
         else
         {
             int nmatches = matcher.SearchByBoW(pKF,mCurrentFrame,vvpMapPointMatches[i]);
-            if(nmatches<15)
+            // if(nmatches<15)
+            if(false) //Mohammad
             {
                 vbDiscarded[i] = true;
                 continue;
@@ -1425,8 +1426,7 @@ bool Tracking::Relocalization()
         for(int i=0; i<nKFs; i++)
         {
             if(vbDiscarded[i]) {continue;}
-            KeyFrame* pKF = vpCandidateKFs[i];
-            cout << fixed << setprecision(6) << pKF->mTimeStamp << " ";
+            cout << fixed << setprecision(6) << vpCandidateKFs[i]->mTimeStamp << " ";
         }
         cout << endl;
     }
@@ -1435,6 +1435,13 @@ bool Tracking::Relocalization()
     // Until we found a camera pose supported by enough inliers
     bool bMatch = false;
     ORBmatcher matcher2(0.9,true);
+
+
+    int nGoodMax = 0; //Mohammad
+    // int thresh1 = 30;
+    // int thresh2 = 50;
+    int thresh1 = 0;
+    int thresh2 = 1;
 
     while(nCandidates>0 && !bMatch)
     {
@@ -1454,6 +1461,10 @@ bool Tracking::Relocalization()
             // If Ransac reachs max. iterations discard keyframe
             if(bNoMore)
             {
+                // cout << "Keyframe "; //Mohammad
+                // cout << fixed << setprecision(6) << vpCandidateKFs[i]->mTimeStamp;
+                // cout << " reached max RANSAC iterations.. dicarded" << endl;
+
                 vbDiscarded[i]=true;
                 nCandidates--;
             }
@@ -1480,25 +1491,33 @@ bool Tracking::Relocalization()
 
                 int nGood = Optimizer::PoseOptimization(&mCurrentFrame);
 
-                if(nGood<10)
-                    continue;
+                if(nGood>nGoodMax) //Mohammad
+                    nGoodMax = nGood;
+
+                // if(nGood<10)
+                // {
+                //     continue;
+                // }
 
                 for(int io =0; io<mCurrentFrame.N; io++)
                     if(mCurrentFrame.mvbOutlier[io])
                         mCurrentFrame.mvpMapPoints[io]=static_cast<MapPoint*>(NULL);
 
                 // If few inliers, search by projection in a coarse window and optimize again
-                if(nGood<50)
+                if(nGood<thresh2)
                 {
                     int nadditional =matcher2.SearchByProjection(mCurrentFrame,vpCandidateKFs[i],sFound,10,100);
 
-                    if(nadditional+nGood>=50)
+                    if(nadditional+nGood>=thresh2)
                     {
                         nGood = Optimizer::PoseOptimization(&mCurrentFrame);
 
+                        if(nGood>nGoodMax) //Mohammad
+                            nGoodMax = nGood;
+
                         // If many inliers but still not enough, search by projection again in a narrower window
                         // the camera has been already optimized with many points
-                        if(nGood>30 && nGood<50)
+                        if(nGood>thresh1 && nGood<thresh2)
                         {
                             sFound.clear();
                             for(int ip =0; ip<mCurrentFrame.N; ip++)
@@ -1507,9 +1526,12 @@ bool Tracking::Relocalization()
                             nadditional =matcher2.SearchByProjection(mCurrentFrame,vpCandidateKFs[i],sFound,3,64);
 
                             // Final optimization
-                            if(nGood+nadditional>=50)
+                            if(nGood+nadditional>=thresh2)
                             {
                                 nGood = Optimizer::PoseOptimization(&mCurrentFrame);
+
+                                if(nGood>nGoodMax) //Mohammad
+                                    nGoodMax = nGood;
 
                                 for(int io =0; io<mCurrentFrame.N; io++)
                                     if(mCurrentFrame.mvbOutlier[io])
@@ -1519,9 +1541,8 @@ bool Tracking::Relocalization()
                     }
                 }
 
-
                 // If the pose is supported by enough inliers stop ransacs and continue
-                if(nGood>=50)
+                if(nGood>=thresh2)
                 {
                     bMatch = true;
                     break;
@@ -1535,6 +1556,7 @@ bool Tracking::Relocalization()
         cout << "DEBUG: Relocalizing frame: ";
         cout << fixed << setprecision(6) << mCurrentFrame.mTimeStamp;
         cout << ", matching succesful? " << bMatch << endl;
+        cout << "DEBUG: nGoodMax= " << nGoodMax << endl;
     }
 
     if(!bMatch)

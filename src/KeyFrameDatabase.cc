@@ -349,19 +349,48 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
             bestAccScore=accScore;
     }
 
-    lAccScoreAndMatch.clear(); //Mohammad
-    lAccScoreAndMatch.reserve(lScoreAndMatch.size());
-    copy(begin(lScoreAndMatch),end(lScoreAndMatch),back_inserter(lAccScoreAndMatch)); //Mohammad
-    sort(lAccScoreAndMatch.rbegin(),lAccScoreAndMatch.rend()); //Mohammad
+    vector<KeyFrame*> vpRelocCandidates;
+    if(useCNN) //Mohammad: directly send CNN candidates
+    {
+        lAccScoreAndMatch.clear();
+        lAccScoreAndMatch.reserve(lScoreAndMatch.size());
+        copy(begin(lScoreAndMatch),end(lScoreAndMatch),back_inserter(lAccScoreAndMatch));
+        sort(lAccScoreAndMatch.rbegin(),lAccScoreAndMatch.rend());
+        int nkf(min(10,int(lAccScoreAndMatch.size())));
+        vpRelocCandidates.reserve(lAccScoreAndMatch.size());
+        for(vector<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.begin()+nkf; it!=itend; it++)
+        {
+            KeyFrame* pKFi = it->second;
+            vpRelocCandidates.push_back(pKFi);
+        }
+    }
+    else //the original approach
+    {
+        // Return all those keyframes with a score higher than 0.75*bestScore
+        float minScoreToRetain = 0.75f*bestAccScore;
+        set<KeyFrame*> spAlreadyAddedKF;
+        vpRelocCandidates.reserve(lAccScoreAndMatch.size());
+        for(vector<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.end(); it!=itend; it++)
+        {
+            const float &si = it->first;
+            if(si>minScoreToRetain)
+            {
+                KeyFrame* pKFi = it->second;
+                if(!spAlreadyAddedKF.count(pKFi))
+                {
+                    vpRelocCandidates.push_back(pKFi);
+                    spAlreadyAddedKF.insert(pKFi);
+                }
+            }
+        }
+    }
 
     // // Return all those keyframes with a score higher than 0.75*bestScore
-    // // float minScoreToRetain = 0.75f*bestAccScore;
-    // // float minScoreToRetain = lAccScoreAndMatch[10].first; //Mohammad
+    // float minScoreToRetain = 0.75f*bestAccScore;
     // set<KeyFrame*> spAlreadyAddedKF;
     // vector<KeyFrame*> vpRelocCandidates;
     // vpRelocCandidates.reserve(lAccScoreAndMatch.size());
-    // // for(list<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.end(); it!=itend; it++)
-    // for(vector<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.end(); it!=itend; it++)
+    // for(list<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.end(); it!=itend; it++)
     // {
     //     const float &si = it->first;
     //     if(si>minScoreToRetain)
@@ -374,14 +403,6 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
     //         }
     //     }
     // }
-
-    int nkf(min(10,int(lAccScoreAndMatch.size()))); //Mohammad
-    vector<KeyFrame*> vpRelocCandidates; //Mohammad
-    for(vector<pair<float,KeyFrame*> >::iterator it=lAccScoreAndMatch.begin(), itend=lAccScoreAndMatch.begin()+nkf; it!=itend; it++)
-    {
-        KeyFrame* pKFi = it->second;
-        vpRelocCandidates.push_back(pKFi);
-    } //Mohammad
 
     return vpRelocCandidates;
 }
