@@ -1369,10 +1369,7 @@ bool Tracking::Relocalization()
         cout << fixed << setprecision(6) << mCurrentFrame.mTimeStamp;
         cout << ", found " << vpCandidateKFs.size() << " candidates" << endl;
         for(int i=0; i<nKFs; i++)
-        {
-            KeyFrame* pKF = vpCandidateKFs[i];
-            cout << fixed << setprecision(6) << pKF->mTimeStamp << " ";
-        }
+            cout << fixed << setprecision(6) << vpCandidateKFs[i]->mTimeStamp << " ";
         cout << endl;
     }
 
@@ -1394,6 +1391,7 @@ bool Tracking::Relocalization()
 
     int nCandidates=0;
 
+    cout << "nmatches: "; //Mohammad
     for(int i=0; i<nKFs; i++)
     {
         KeyFrame* pKF = vpCandidateKFs[i];
@@ -1401,8 +1399,10 @@ bool Tracking::Relocalization()
             vbDiscarded[i] = true;
         else
         {
-            int nmatches = matcher.SearchByBoW(pKF,mCurrentFrame,vvpMapPointMatches[i]);
-            if(nmatches<15)
+            int nmatches = matcher.SearchByBoW(pKF,mCurrentFrame,vvpMapPointMatches[i]); //Mohammad
+            cout << i << "->" << nmatches << " "; //Mohammad
+            // if(nmatches<15) //Mohammad
+            if(false) //Mohammad
             {
                 vbDiscarded[i] = true;
                 continue;
@@ -1416,6 +1416,7 @@ bool Tracking::Relocalization()
             }
         }
     }
+    cout << endl; //Mohammad
 
     if (mState==LOST || mState==PANIC)
     {
@@ -1423,11 +1424,8 @@ bool Tracking::Relocalization()
         cout << fixed << setprecision(6) << mCurrentFrame.mTimeStamp;
         cout << ", " << nCandidates << " candidates retained" << endl;
         for(int i=0; i<nKFs; i++)
-        {
-            if(vbDiscarded[i]) {continue;}
-            KeyFrame* pKF = vpCandidateKFs[i];
-            cout << fixed << setprecision(6) << pKF->mTimeStamp << " ";
-        }
+            if(!vbDiscarded[i])
+                cout << fixed << setprecision(6) << vpCandidateKFs[i]->mTimeStamp << " ";
         cout << endl;
     }
 
@@ -1436,12 +1434,16 @@ bool Tracking::Relocalization()
     bool bMatch = false;
     ORBmatcher matcher2(0.9,true);
 
+    vector<int> vnGood(nKFs,-1); //Mohammad
+
     while(nCandidates>0 && !bMatch)
     {
         for(int i=0; i<nKFs; i++)
         {
             if(vbDiscarded[i])
+            {
                 continue;
+            }
 
             // Perform 5 Ransac Iterations
             vector<bool> vbInliers;
@@ -1519,6 +1521,7 @@ bool Tracking::Relocalization()
                     }
                 }
 
+                vnGood[i] = nGood;//Mohammad
 
                 // If the pose is supported by enough inliers stop ransacs and continue
                 if(nGood>=50)
@@ -1535,6 +1538,10 @@ bool Tracking::Relocalization()
         cout << "DEBUG: Relocalizing frame: ";
         cout << fixed << setprecision(6) << mCurrentFrame.mTimeStamp;
         cout << ", matching succesful? " << bMatch << endl;
+        cout << "nGood: ";
+        for(int i=0; i<nKFs; i++)
+            cout << vnGood[i] << "\t";
+        cout << endl;
     }
 
     if(!bMatch)

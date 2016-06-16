@@ -3,7 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
-log = 'loc_lesschecks_panic_cnn'
+# log = 'loc_lesschecks_panic_cnn'
+log = 'tmp'
+
 filename = 'logs/'+log+'/log.txt'
 
 testpath = '/home/mo/Desktop/ROS_data/jaguar/2016-03-04/test/left/'
