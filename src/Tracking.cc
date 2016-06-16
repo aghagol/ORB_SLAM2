@@ -1469,85 +1469,91 @@ bool Tracking::Relocalization()
                 nCandidates--;
             }
 
-            // If a Camera Pose is computed, optimize
-            if(!Tcw.empty())
+            if(!Tcw.empty()) //Mohammad
             {
-                Tcw.copyTo(mCurrentFrame.mTcw);
-
-                set<MapPoint*> sFound;
-
-                const int np = vbInliers.size();
-
-                for(int j=0; j<np; j++)
-                {
-                    if(vbInliers[j])
-                    {
-                        mCurrentFrame.mvpMapPoints[j]=vvpMapPointMatches[i][j];
-                        sFound.insert(vvpMapPointMatches[i][j]);
-                    }
-                    else
-                        mCurrentFrame.mvpMapPoints[j]=NULL;
-                }
-
-                int nGood = Optimizer::PoseOptimization(&mCurrentFrame);
-
-                if(nGood>nGoodMax) //Mohammad
-                    nGoodMax = nGood;
-
-                // if(nGood<10)
-                // {
-                //     continue;
-                // }
-
-                for(int io =0; io<mCurrentFrame.N; io++)
-                    if(mCurrentFrame.mvbOutlier[io])
-                        mCurrentFrame.mvpMapPoints[io]=static_cast<MapPoint*>(NULL);
-
-                // If few inliers, search by projection in a coarse window and optimize again
-                if(nGood<thresh2)
-                {
-                    int nadditional =matcher2.SearchByProjection(mCurrentFrame,vpCandidateKFs[i],sFound,10,100);
-
-                    if(nadditional+nGood>=thresh2)
-                    {
-                        nGood = Optimizer::PoseOptimization(&mCurrentFrame);
-
-                        if(nGood>nGoodMax) //Mohammad
-                            nGoodMax = nGood;
-
-                        // If many inliers but still not enough, search by projection again in a narrower window
-                        // the camera has been already optimized with many points
-                        if(nGood>thresh1 && nGood<thresh2)
-                        {
-                            sFound.clear();
-                            for(int ip =0; ip<mCurrentFrame.N; ip++)
-                                if(mCurrentFrame.mvpMapPoints[ip])
-                                    sFound.insert(mCurrentFrame.mvpMapPoints[ip]);
-                            nadditional =matcher2.SearchByProjection(mCurrentFrame,vpCandidateKFs[i],sFound,3,64);
-
-                            // Final optimization
-                            if(nGood+nadditional>=thresh2)
-                            {
-                                nGood = Optimizer::PoseOptimization(&mCurrentFrame);
-
-                                if(nGood>nGoodMax) //Mohammad
-                                    nGoodMax = nGood;
-
-                                for(int io =0; io<mCurrentFrame.N; io++)
-                                    if(mCurrentFrame.mvbOutlier[io])
-                                        mCurrentFrame.mvpMapPoints[io]=NULL;
-                            }
-                        }
-                    }
-                }
-
-                // If the pose is supported by enough inliers stop ransacs and continue
-                if(nGood>=thresh2)
-                {
-                    bMatch = true;
-                    break;
-                }
+                bMatch = true;
+                break;
             }
+
+            // // If a Camera Pose is computed, optimize
+            // if(!Tcw.empty())
+            // {
+            //     Tcw.copyTo(mCurrentFrame.mTcw);
+
+            //     set<MapPoint*> sFound;
+
+            //     const int np = vbInliers.size();
+
+            //     for(int j=0; j<np; j++)
+            //     {
+            //         if(vbInliers[j])
+            //         {
+            //             mCurrentFrame.mvpMapPoints[j]=vvpMapPointMatches[i][j];
+            //             sFound.insert(vvpMapPointMatches[i][j]);
+            //         }
+            //         else
+            //             mCurrentFrame.mvpMapPoints[j]=NULL;
+            //     }
+
+            //     int nGood = Optimizer::PoseOptimization(&mCurrentFrame);
+
+            //     if(nGood>nGoodMax) //Mohammad
+            //         nGoodMax = nGood;
+
+            //     // if(nGood<10)
+            //     // {
+            //     //     continue;
+            //     // }
+
+            //     for(int io =0; io<mCurrentFrame.N; io++)
+            //         if(mCurrentFrame.mvbOutlier[io])
+            //             mCurrentFrame.mvpMapPoints[io]=static_cast<MapPoint*>(NULL);
+
+            //     // If few inliers, search by projection in a coarse window and optimize again
+            //     if(nGood<thresh2)
+            //     {
+            //         int nadditional =matcher2.SearchByProjection(mCurrentFrame,vpCandidateKFs[i],sFound,10,100);
+
+            //         if(nadditional+nGood>=thresh2)
+            //         {
+            //             nGood = Optimizer::PoseOptimization(&mCurrentFrame);
+
+            //             if(nGood>nGoodMax) //Mohammad
+            //                 nGoodMax = nGood;
+
+            //             // If many inliers but still not enough, search by projection again in a narrower window
+            //             // the camera has been already optimized with many points
+            //             if(nGood>thresh1 && nGood<thresh2)
+            //             {
+            //                 sFound.clear();
+            //                 for(int ip =0; ip<mCurrentFrame.N; ip++)
+            //                     if(mCurrentFrame.mvpMapPoints[ip])
+            //                         sFound.insert(mCurrentFrame.mvpMapPoints[ip]);
+            //                 nadditional =matcher2.SearchByProjection(mCurrentFrame,vpCandidateKFs[i],sFound,3,64);
+
+            //                 // Final optimization
+            //                 if(nGood+nadditional>=thresh2)
+            //                 {
+            //                     nGood = Optimizer::PoseOptimization(&mCurrentFrame);
+
+            //                     if(nGood>nGoodMax) //Mohammad
+            //                         nGoodMax = nGood;
+
+            //                     for(int io =0; io<mCurrentFrame.N; io++)
+            //                         if(mCurrentFrame.mvbOutlier[io])
+            //                             mCurrentFrame.mvpMapPoints[io]=NULL;
+            //                 }
+            //             }
+            //         }
+            //     }
+
+            //     // If the pose is supported by enough inliers stop ransacs and continue
+            //     if(nGood>=thresh2)
+            //     {
+            //         bMatch = true;
+            //         break;
+            //     }
+            // }
         }
     }
 
