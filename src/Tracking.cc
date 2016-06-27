@@ -1371,6 +1371,11 @@ bool Tracking::Relocalization()
         for(int i=0; i<nKFs; i++)
             cout << fixed << setprecision(6) << vpCandidateKFs[i]->mTimeStamp << " ";
         cout << endl;
+        cout << "DEBUG: N ";
+        cout << mCurrentFrame.N << " ";
+        for(int i=0; i<nKFs; i++)
+            cout << i << "->" << vpCandidateKFs[i]->N << " ";
+        cout << endl;
     }
 
     if(vpCandidateKFs.empty())
@@ -1410,7 +1415,8 @@ bool Tracking::Relocalization()
             else
             {
                 PnPsolver* pSolver = new PnPsolver(mCurrentFrame,vvpMapPointMatches[i]);
-                pSolver->SetRansacParameters(0.99,10,300,4,0.5,5.991);
+                pSolver->SetRansacParameters(0.99,10,300,4,0.5,5.991); //Mohammad
+                // pSolver->SetRansacParameters(0.99,1,300,4,0.1,5.991); //Mohammad
                 vpPnPsolvers[i] = pSolver;
                 nCandidates++;
             }
@@ -1434,7 +1440,8 @@ bool Tracking::Relocalization()
     bool bMatch = false;
     ORBmatcher matcher2(0.9,true);
 
-    vector<int> vnGood(nKFs,-1); //Mohammad
+    vector<int> vnGood(nKFs,-50); //Mohammad
+    bool reward = true; //Mohammad: reward the best failed pose
 
     while(nCandidates>0 && !bMatch)
     {
@@ -1482,8 +1489,8 @@ bool Tracking::Relocalization()
 
                 int nGood = Optimizer::PoseOptimization(&mCurrentFrame);
 
-                if(nGood<10)
-                    continue;
+                // if(nGood<10) //Mohammad
+                //     continue;
 
                 for(int io =0; io<mCurrentFrame.N; io++)
                     if(mCurrentFrame.mvbOutlier[io])
@@ -1529,7 +1536,22 @@ bool Tracking::Relocalization()
                     bMatch = true;
                     break;
                 }
+                if(!reward && nGood>0)
+                {
+                    cout << "DEBUG: rewarded. Reporting a positive match." << endl;
+                    bMatch = true;
+                }
             }
+        }
+        //Mohammad: reward the good failed candidate
+        auto bi = distance(vnGood.begin(), max_element(vnGood.begin(),vnGood.end()));
+        if(vnGood[bi]>-50 && !nCandidates && !bMatch && reward)
+        {
+            // cout << "DEBUG: rewarding candidate " << bi;
+            // cout << " with nGoodness " << vnGood[bi] << endl;
+            // reward = false;
+            // vbDiscarded[bi] = false;
+            // nCandidates++;
         }
     }
 
