@@ -1,11 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-log = 'loc_top10cnn_ransac1_withreward'
+log = 'pioneer_loc'
 
 filename = 'logs/'+log+'/CameraTrajectory_train_test_2016_03_04.txt'
-n1 = 3530
-n2 = 3333
+# n1 = 3530
+# n2 = 3333
+
+n1 = 5664
+n2 = 4826
+
+# n1 = 9760
+# n2 = 4826
 
 x = np.zeros(n1+n2)
 y = np.zeros(n1+n2)

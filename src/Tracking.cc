@@ -1363,7 +1363,7 @@ bool Tracking::Relocalization()
 
     const int nKFs = vpCandidateKFs.size();
 
-    if (mState==LOST || mState==PANIC)
+    if ((mState==LOST || mState==PANIC) && mbOnlyTracking)
     {
         cout << "DEBUG: Relocalizing frame: ";
         cout << fixed << setprecision(6) << mCurrentFrame.mTimeStamp;
@@ -1396,7 +1396,9 @@ bool Tracking::Relocalization()
 
     int nCandidates=0;
 
-    cout << "nmatches: "; //Mohammad
+    if ((mState==LOST || mState==PANIC) && mbOnlyTracking)
+    	cout << "nmatches: "; //Mohammad
+
     for(int i=0; i<nKFs; i++)
     {
         KeyFrame* pKF = vpCandidateKFs[i];
@@ -1404,9 +1406,12 @@ bool Tracking::Relocalization()
             vbDiscarded[i] = true;
         else
         {
-            int nmatches = matcher.SearchByBoW(pKF,mCurrentFrame,vvpMapPointMatches[i]); //Mohammad
-            cout << i << "->" << nmatches << " "; //Mohammad
-            // if(nmatches<15) //Mohammad
+            int nmatches = matcher.SearchByBoW(pKF,mCurrentFrame,vvpMapPointMatches[i]); 
+
+            if ((mState==LOST || mState==PANIC) && mbOnlyTracking)
+            	cout << i << "->" << nmatches << " "; //Mohammad
+
+            // if(nmatches<15)
             if(false) //Mohammad
             {
                 vbDiscarded[i] = true;
@@ -1422,9 +1427,11 @@ bool Tracking::Relocalization()
             }
         }
     }
-    cout << endl; //Mohammad
 
-    if (mState==LOST || mState==PANIC)
+    if ((mState==LOST || mState==PANIC) && mbOnlyTracking)
+    	cout << endl; //Mohammad
+
+    if ((mState==LOST || mState==PANIC) && mbOnlyTracking)
     {
         cout << "DEBUG: Relocalizing frame: ";
         cout << fixed << setprecision(6) << mCurrentFrame.mTimeStamp;
@@ -1536,7 +1543,7 @@ bool Tracking::Relocalization()
                     bMatch = true;
                     break;
                 }
-                if(!reward && nGood>0)
+                if(!reward && nGood>0 && ((mState==LOST || mState==PANIC) && mbOnlyTracking))
                 {
                     cout << "DEBUG: rewarded. Reporting a positive match." << endl;
                     bMatch = true;
@@ -1545,7 +1552,7 @@ bool Tracking::Relocalization()
         }
         //Mohammad: reward the good failed candidate
         auto bi = distance(vnGood.begin(), max_element(vnGood.begin(),vnGood.end()));
-        if(vnGood[bi]>-50 && !nCandidates && !bMatch && reward)
+        if(vnGood[bi]>-50 && !nCandidates && !bMatch && reward && ((mState==LOST || mState==PANIC) && mbOnlyTracking))
         {
             // cout << "DEBUG: rewarding candidate " << bi;
             // cout << " with nGoodness " << vnGood[bi] << endl;
@@ -1555,7 +1562,7 @@ bool Tracking::Relocalization()
         }
     }
 
-    if (mState==LOST || mState==PANIC)
+    if ((mState==LOST || mState==PANIC) && mbOnlyTracking)
     {
         cout << "DEBUG: Relocalizing frame: ";
         cout << fixed << setprecision(6) << mCurrentFrame.mTimeStamp;

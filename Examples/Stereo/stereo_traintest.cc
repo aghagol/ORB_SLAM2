@@ -75,8 +75,8 @@ int main(int argc, char **argv)
     cout << "=============== Localization Mode with test data: STARTED! ============= " << endl;
     SLAM.SetF2FSSPath(argv[3]);
     SLAM.ActivateLocalizationMode();
-    SLAM.ActivatePanicMode();
-    SLAM.ActivateCNN();
+    // SLAM.ActivatePanicMode();
+    // SLAM.ActivateCNN();
     vstrImageLeft.clear();
     vstrImageRight.clear();
     vTimestamps.clear();

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-logfiles = ['nkp']
+logfiles = ['pioneer_loc']
 
 for log in logfiles:
 	filename = 'logs/'+log+'/log.txt'
@@ -26,11 +26,23 @@ for log in logfiles:
 				if len(ss)>1 and ss[1]=='N':
 					nkp.append(int(ss[2]))
 					nkp_can.append([int(i.split('->')[1]) for i in ss[3:]])
+					while len(nkp_can[-1])<10:
+						nkp_can[-1].append(nkp_can[-1][-1])
+					if len(nkp_can[-1])>=10:
+						nkp_can[-1]=nkp_can[-1][:10]
 				continue
 			if ss[0]=='nmatches:':
 				nm.append([int(i.split('->')[1]) for i in ss[1:]])
+				while len(nm[-1])<10:
+					nm[-1].append(nm[-1][-1])
+				if len(nm[-1])>=10:
+					nm[-1]=nm[-1][:10]
 			if ss[0]=='nGood:':
 				ng.append([int(i) for i in ss[1:]])
+				while len(ng[-1])<10:
+					ng[-1].append(ng[-1][-1])
+				if len(ng[-1])>=10:
+					ng[-1]=ng[-1][:10]
 
 	hit_idx = np.arange(len(hit))[np.array(hit)>0]
 	mis_idx = np.arange(len(hit))[np.array(hit)<1]
@@ -43,7 +55,7 @@ for log in logfiles:
 	h2, = ax.plot(np.arange(len(ret))[np.array(hit)<1],np.array(ret)[np.array(hit)<1],'r.')
 	ax.set_xlabel('frame number (test)')
 	ax.set_ylabel('number of retained candidates')
-	ax.set_xlim([-100, 3400])
+	ax.set_xlim([-100, len(can)+100])
 	ax.set_ylim([-1, 11])
 	ax.legend([h1,h2],['successful %.2f'%(sr),'failed reloc'],loc='best')
 	ax.grid(True)
@@ -59,7 +71,7 @@ for log in logfiles:
 		ax.plot(mis_idx,ng[mis_idx][:,i],'r.')
 	ax.set_xlabel('frame number (test)')
 	ax.set_ylabel('nGood (for every candidate per test frame)')
-	ax.set_xlim([-100, 3400])
+	ax.set_xlim([-100, len(can)+100])
 	ax.grid(True)
 	plt.savefig('logs/'+log+'/nGoodStats_%s.png'%(log))
 	plt.close(fig)
@@ -70,7 +82,7 @@ for log in logfiles:
 		ax.plot(range(len(nm)),np.array(nm)[:,i],'bs')
 	ax.set_xlabel('frame number (test)')
 	ax.set_ylabel('nMatches (for every candidate per test frame)')
-	ax.set_xlim([-100, 3400])
+	ax.set_xlim([-100, len(can)+100])
 	ax.grid(True)
 	plt.savefig('logs/'+log+'/nMatchStats_%s.png'%(log))
 	plt.close(fig)
@@ -82,7 +94,7 @@ for log in logfiles:
 	ax.plot(range(len(nkp)),nkp,'r')
 	ax.set_xlabel('frame number (test)')
 	ax.set_ylabel('number of keypoints')
-	ax.set_xlim([-100, 3400])
+	ax.set_xlim([-100, len(can)+100])
 	ax.grid(True)
 	plt.savefig('logs/'+log+'/nStats_%s.png'%(log))
 	plt.close(fig)
